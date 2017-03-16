@@ -20,6 +20,7 @@
 #
 ##############################################################################
 
+from openerp import api
 from openerp.osv import orm
 import openerp.tools as tools
 from lxml import etree
@@ -98,7 +99,9 @@ class MassEditingWizard(orm.TransientModel):
                         'name': field.name, 'nolabel': '1', 'colspan': '2',
                         'attrs': (
                             "{'invisible':[('selection__" +
-                            field.name + "','=','remove')]}")})
+                            field.name + "','=','remove')]}"),
+                        'options': '{"no_open": True, "no_create": True}',
+                        'default_focus': len(editing_data.field_ids) == 1 and '1' or '0'})
                 elif field.ttype == "char":
                     all_fields["selection__" + field.name] = {
                         'type': 'selection',
@@ -182,6 +185,16 @@ class MassEditingWizard(orm.TransientModel):
             result['arch'] = etree.tostring(root)
             result['fields'] = all_fields
         return result
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super(MassEditingWizard, self).default_get(fields_list)
+        fields = self.fields_view_get()['fields']
+        if len(fields) == 2:
+            for x in fields_list:
+                if x.startswith('selection__') and fields[x].get('selection') == [('set', 'Set'), ('remove', 'Remove')]:
+                    res[x] = 'set'
+        return res
 
     def read(self, cr, uid, ids, fields, context=None):
         """ Without this call, dynamic fields defined in fields_view_get()
