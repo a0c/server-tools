@@ -35,6 +35,7 @@ class MassObject(orm.Model):
         'field_ids': fields.many2many(
             'ir.model.fields', 'mass_field_rel', 'mass_id', 'field_id',
             'Fields'),
+        'domain_code': fields.text('Domain Code'),
         'ref_ir_act_window': fields.many2one(
             'ir.actions.act_window', 'Sidebar Action', readonly=True,
             help="Sidebar action to make this template available on records \

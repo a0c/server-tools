@@ -23,6 +23,7 @@
 from openerp import api
 from openerp.osv import orm
 import openerp.tools as tools
+from openerp.tools.safe_eval import safe_eval as eval
 from lxml import etree
 
 
@@ -86,6 +87,11 @@ class MassEditingWizard(orm.TransientModel):
                             "{'invisible':[('selection__" +
                             field.name + "','=','remove_o2m')]}")})
                 elif field.ttype == "many2one":
+                    domain = ''
+                    if editing_data.domain_code:
+                        eval_context = {'field': field.name, 'recs': model_obj.browse(cr, uid, context['active_ids'], context=context)}
+                        eval(editing_data.domain_code.strip(), eval_context, mode="exec", nocopy=True),  # nocopy allows to return 'domain'
+                        domain = eval_context.get('domain', '')
                     all_fields["selection__" + field.name] = {
                         'type': 'selection',
                         'string': field_info[field.name]['string'],
@@ -101,6 +107,7 @@ class MassEditingWizard(orm.TransientModel):
                             "{'invisible':[('selection__" +
                             field.name + "','=','remove')]}"),
                         'options': '{"no_open": True, "no_create": True}',
+                        'domain': domain,
                         'default_focus': len(editing_data.field_ids) == 1 and '1' or '0'})
                 elif field.ttype == "char":
                     all_fields["selection__" + field.name] = {
