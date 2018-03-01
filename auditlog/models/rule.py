@@ -377,6 +377,7 @@ class AuditlogRule(models.Model):
             }
             vals.update(additional_log_values or {})
             log = log_model.create(vals)
+            log_model += log
             diff = DictDiffer(
                 new_values.get(res_id, EMPTY_DICT),
                 old_values.get(res_id, EMPTY_DICT))
@@ -388,6 +389,7 @@ class AuditlogRule(models.Model):
             elif method is 'write':
                 self._create_log_line_on_write(
                     log, diff.changed(), old_values, new_values)
+        return log_model
 
     def _get_field(self, model, field_name):
         cache = self.pool._auditlog_field_cache
