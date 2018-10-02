@@ -116,7 +116,7 @@ Sample connection strings:
         return conn
 
     def execute(self, cr, uid, ids, sqlquery, sqlparams=None, metadata=False,
-                context=None):
+                connection=None, context=None):
         """Executes SQL and returns a list of rows.
 
             "sqlparams" can be a dict of values, that can be referenced in
@@ -136,7 +136,7 @@ Sample connection strings:
         data = self.browse(cr, uid, ids)
         rows, cols = list(), list()
         for obj in data:
-            conn = self.conn_open(cr, uid, obj.id)
+            conn = self.conn_open(cr, uid, obj.id) if connection is None else connection
             if obj.connector in ["sqlite", "mysql", "mssql"]:
                 # using sqlalchemy
                 cur = conn.execute(sqlquery, sqlparams)
@@ -150,7 +150,8 @@ Sample connection strings:
                 if metadata:
                     cols = [d[0] for d in cur.description]
                 rows = cur.fetchall()
-            conn.close()
+            if connection is None:
+                conn.close()
         if metadata:
             return{'cols': cols, 'rows': rows}
         else:
