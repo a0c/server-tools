@@ -238,8 +238,16 @@ class MassEditingWizard(orm.TransientModel):
                             m2m_list.append((4, m2m_id))
                         dict.update({split_key: m2m_list})
             if dict:
+                pre_fnc = context.get('mass_editing_preprocess')
+                if pre_fnc:
+                    recs = model_obj.browse(cr, uid, context.get('active_ids'), context)
+                    getattr(recs, pre_fnc)()
                 model_obj.write(
                     cr, uid, context.get('active_ids'), dict, context)
+                post_fnc = context.get('mass_editing_postprocess')
+                if post_fnc:
+                    recs = model_obj.browse(cr, uid, context.get('active_ids'), context)
+                    getattr(recs, post_fnc)()
         result = super(MassEditingWizard, self).create(cr, uid, {}, context)
         return result
 
