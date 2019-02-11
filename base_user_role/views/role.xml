@@ -13,6 +13,7 @@
                         <group>
                             <field name="name"/>
                             <field name="group_id" required="0" readonly="1"/>
+                            <field name="comment"/>
                         </group>
                         <notebook>
                             <page string="Groups">
@@ -40,7 +41,8 @@
             <field name="arch" type="xml">
                 <tree string="Role">
                     <field name="name"/>
-                    <field name="user_ids"/>
+                    <field name="comment"/>
+                    <field name="user_ids" widget="one2many_tags"/>
                 </tree>
             </field>
         </record>
